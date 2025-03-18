@@ -1,9 +1,9 @@
 <template>
 	<view class="theme-item">
 		<navigator url="/pages/classlist/classlist" class='box' v-if="!isMore">
-			<image class="pic" src='/common/image/category.png' mode='aspectFill'></image>
-			<view class="mask">种类</view>
-			<view class='tab'>n天前更新</view>
+			<image class="pic" :src='item.picurl' mode='aspectFill'></image>
+			<view class="mask">{{item.name}}</view>
+			<view class='tab'>{{formatTimeDifference(item.updateTime)}}前更新</view>
 		</navigator>
 		
 		<navigator url="/pages/classify/classify" open-type="reLaunch" class='box more' v-if="isMore">
@@ -19,11 +19,22 @@
 </template>
 
 <script setup>
+import {formatTimeDifference} from '@/utils/time.js'
 
 defineProps({
 	isMore:{
 		type:Boolean,
 		default:false
+	},
+	item:{
+		type:Object,
+		default(){
+			return {
+				name:'默认名称',
+				picurl:'../../common/image/category.png',
+				updateTime:Date.now() -1000*60*60*5
+			}
+		}
 	}
 })
 	

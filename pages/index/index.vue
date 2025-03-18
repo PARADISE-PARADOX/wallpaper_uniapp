@@ -3,8 +3,8 @@
 		<custom-nav-bar title="推荐"></custom-nav-bar>
 		<view class="banner">
 			<swiper indicator-dots indicator-color="rgba(255,255,255,.3)" indicator-active-color="#fff" autoplay circular>
-				<swiper-item v-for="(item,index) in bannerList" :key='index'>
-					<image :src="item" mode="aspectFill"></image>
+				<swiper-item v-for="item in bannerList" :key='item.id'>
+					<image :src="item.url" mode="aspectFill"></image>
 				</swiper-item>
 			</swiper>
 		</view>
@@ -16,7 +16,9 @@
 			</view>
 			<view class="mid">
 				<swiper vertical autoplay interval="1500" duration="300" circular>
-					<swiper-item v-for="item in 4">contentcontentcontentcontentcontentcontentcontent</swiper-item>
+					<swiper-item v-for="item in noticeList" :key="item.id">
+						{{item.content}}
+					</swiper-item>
 				</swiper>
 			</view>
 			<view class="right">
@@ -36,8 +38,8 @@
 			</part-title>
 			<view class='content'>
 				<scroll-view scroll-x>
-					<view class='box' v-for="item in 5" @click="goPrev">
-						<image src="/common/image/schoolgirl.png" mode='aspectFill'></image>
+					<view class='box' v-for="item in randomList" :key="item.id" @click="goPrev">
+						<image :src="item.url" mode='aspectFill'></image>
 					</view>
 				</scroll-view>
 			</view>
@@ -52,7 +54,7 @@
 			</part-title>
 			
 			<view class='content'>
-				<theme-item v-for="item in 8" >
+				<theme-item v-for="item in classifyList" :key="item._id" :item="item">
 					
 				</theme-item>
 				<theme-item :isMore="true">
@@ -64,13 +66,42 @@
 </template>
 
 <script setup>
+import {ref} from 'vue'
+import { apiGetBanner, apiGetRandom, apiGetNotice, apiGetClassify} from '@/api/apis.js'
 	
-const bannerList = [
-	"/static/image/banner1.png",
-	"/static/image/banner2.png",
-	"/static/image/banner3.png",
-	// 添加更多图片地址
-];	
+//获取图片API
+const bannerList = ref([])
+const getBanner = async ()=>{
+	let res = await apiGetBanner()
+	bannerList.value = res.data;
+}
+getBanner();
+
+
+//每日推荐随机壁纸
+const randomList = ref([])
+const getRandom = async()=>{
+	let res = await apiGetRandom()
+	randomList.value = res.data;
+}
+getRandom();
+
+//获取公告
+const noticeList = ref([])
+const getNotice = async()=>{
+	let res = await apiGetNotice()
+	noticeList.value = res.data;
+}
+getNotice(); 
+
+//获取分类
+const classifyList = ref([])
+const getClassify = async()=>{
+	let res = await apiGetClassify()
+	console.log(res)
+	classifyList.value = res.data.data;
+}
+getClassify();
 
 const goPrev = () => {
 	uni.navigateTo({
