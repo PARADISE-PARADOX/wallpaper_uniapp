@@ -11,12 +11,13 @@ export function request(config={}){
 			    'Content-Type': 'application/json', // 设置请求头
 			},
 			success:res=>{
-				if(res.statusCode===200){
+				if(res.data.errCode!==400 && res.statusCode===200 ){
+					
 					resolve(res)
-				}else{
+				}else if(res.data.errCode===400){
 					uni.showModal({
 						title:"错误提示",
-						content:res.errMsg,
+						content:res.data.errMsg,
 						showCancel:false
 					})
 					reject(res.data)

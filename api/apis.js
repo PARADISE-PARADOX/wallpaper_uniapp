@@ -1,18 +1,36 @@
 import {request} from '@/utils/request.js'
 
-export function apiGetBanner(){
-	return request({url:"/banner.php"})
-	
+export function apiGetBanner(data={}){
+	return request({
+		url:"/banner.php",
+		data
+	})
 }
 
-export function apiGetRandom(){
-	return request({url:"/random.php",data:{batch:9}})
+export function apiGetRandom(data={}){
+	return request({
+		url:"/random.php",
+		data:{batch:9},
+	})
 }
 
-export function apiGetNotice(){
-	return request({url:"/notice.php"})
+export function apiGetNotice(data={}){
+	return request({
+		url:"/notice.php",
+		data
+	})
 }
 
-export function apiGetClassify(){
-	return request({url:"/classify.php"})
+export function apiGetClassify(data={}){
+	return request({
+		url:"/classify.php",
+		data
+	})
+}
+
+export function apiGetClassList(data={}){
+	return request({
+		url:"/wallpaperlist.php",
+		data
+	})
 }

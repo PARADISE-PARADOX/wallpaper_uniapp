@@ -9,4 +9,13 @@ view,swiper,swiper-item{
 	min-height: 80vh;
 }
 
+.loadingLayout{
+		padding:30rpx 0;
+		height: 100rpx;
+}
+
+.safe-area-inset-bottom{
+	height: env(safe-area-inset-bottom);
+}
+
 

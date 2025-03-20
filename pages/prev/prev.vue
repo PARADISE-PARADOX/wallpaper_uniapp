@@ -1,16 +1,16 @@
 <template>
   <view class="prev">
-	<swiper circular>
-		<swiper-item v-for="item in 5" >
-			<image @click="maskChange" src='@/common/image/aiguo.png' mode="aspectFill"></image>
+	<swiper circular :current="curIndex" @change="swiperChange">
+		<swiper-item v-for="(item,index) in classList" :key="item._id">
+			<image v-if="readImgs.includes((index))" @click="maskChange" :src='item.picurl' mode="aspectFill"></image>
 		</swiper-item>
 	</swiper>
-	
+	{{readImgs}}
 	<view class="mask" v-if="maskState">
 		<view class="goBack" :style="{top:getStatusBarHeight()+'px'}" @click="goBack">
 			<uni-icons type="back" color="#fff" size="30"></uni-icons>
 		</view>
-		<view class="count">3 / 9</view>
+		<view class="count">{{curIndex+1}} /{{classList.length}}</view>
 		<view class="time">
 			<uni-dateformat :date="Date.now()" format="hh:mm"></uni-dateformat>
 		</view>
@@ -24,7 +24,7 @@
 			</view>
 			<view class="box" @click="clickScore">
 				<uni-icons type="star" size="30"></uni-icons>
-				<view class='text'>5分</view>
+				<view class='text'>{{curInfo.score}}分</view>
 			</view>
 			<view class="box">
 				<uni-icons type="download" size="30"></uni-icons>
@@ -45,27 +45,27 @@
 				<view class='popupContent'>
 					<view class="popupRow">
 						<view class="label">壁纸ID：</view>
-						<text selectable class="value">31231jfoawe</text>
+						<text selectable class="value">{{curInfo._id}}</text>
 					</view>
 					<view class="popupRow">
 						<view class="label">分类：</view>
-						<text selectable class="value classify">31231jfoawe</text>
+						<text selectable class="value classify">{{curInfo.classid}}</text>
 					</view>
 					<view class="popupRow">
 						<view class="label">评分：</view>
 						<view class="value roteBox">
-							<uni-rate readonly touchable="false"/>
-							<text class='score'>5分</text>
+							<uni-rate readonly touchable="false" :value="curInfo.score"/>
+							<text class='score'>{{curInfo.score}}分</text>
 						</view>
 					</view>
 					<view class="popupRow">
 						<view class="label">描述：</view>
-						<text selectable class="value">31231jfoawe</text>
+						<text selectable class="value">{{curInfo.description}}</text>
 					</view>
 					<view class="popupRow">
 						<view class="label">标签：</view>
 						<view class="value tags">
-							<view class="tag" v-for="item in 3">tags</view>
+							<view class="tag" v-for="item in curInfo.tabs">{{item}}</view>
 						</view>
 					</view>
 					<view class="copyRight">
@@ -101,6 +101,7 @@
 <script setup>
 import {ref} from "vue"
 import {getStatusBarHeight} from "@/utils/system.js"
+import {onLoad} from "@dcloudio/uni-app"
 
 // 点击隐藏遮罩层
 const maskState = ref(true);
@@ -133,13 +134,72 @@ const closeRote = () => {
 const userScore = ref(0)
 // 给出评分
 const giveScore = () => {
-	console.log("qi")
+	console.log(userScore.value)
 }
 
 //返回上一页
 const goBack = () => {
 	uni.navigateBack()
 }
+
+// 获取缓存
+const classList = ref([])
+const storageClassList = uni.getStorageSync("storageClassList") || []
+
+classList.value = storageClassList.map(item=>{
+	return {
+		...item,
+		picurl:item.smallPicurl
+	}
+})
+console.log(classList.value)
+
+// 通过当前图片的id和索引实时查看大图
+const curId = ref(null)
+const curIndex = ref(0)
+onLoad((e)=>{
+	curId.value = e.id
+	let index = classList.value.findIndex(item=>item._id === curId.value)
+	curIndex.value = index
+	
+	// 获取当前图片的索引值
+	readImgsHandler()
+	
+	//获取当前预览图像的具体信息
+	curInfo.value = classList.value[curIndex.value]
+})
+
+//swiper滑动事件
+const swiperChange = (e)=>{
+	console.log(e)
+	curIndex.value = e.detail.current;
+	// 获取当前图片的索引值
+	readImgsHandler()
+	
+	//获取当前预览图像的具体信息
+	curInfo.value = classList.value[curIndex.value]
+}
+
+//获取当前图片与前后两张图片索引的函数（利于浏览）
+const readImgsHandler = () => {
+	readImgs.value.push(
+	curIndex.value<=0?curIndex.value.length-1:curIndex.value-1,
+	curIndex.value,
+	curIndex.value>=curIndex.value.length-1?0:curIndex.value+1
+	)
+	
+	//Set 是 ES6 引入的一种数据结构，它只存储唯一值。将数组转换为 Set，再转换回数组，即可实现去重。
+	readImgs.value = [...new Set(readImgs.value)]
+}
+
+//设置已看过的图片来节省资源
+const readImgs = ref([])
+
+//获取当前预览图像的具体信息
+const curInfo = ref(null)
+
+
+
 </script>
 
 <style lang="scss" scoped>
