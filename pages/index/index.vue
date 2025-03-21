@@ -38,8 +38,8 @@
 			</part-title>
 			<view class='content'>
 				<scroll-view scroll-x>
-					<view class='box' v-for="item in randomList" :key="item.id" @click="goPrev">
-						<image :src="item.url" mode='aspectFill'></image>
+					<view class='box' v-for="item in randomList" :key="item._id" @click="goPrev(item._id)">
+						<image :src="item.smallPicurl" mode='aspectFill'></image>
 					</view>
 				</scroll-view>
 			</view>
@@ -68,6 +68,7 @@
 <script setup>
 import {ref} from 'vue'
 import { apiGetBanner, apiGetRandom, apiGetNotice, apiGetClassify} from '@/api/apis.js'
+import {onShareAppMessage,onShareTimeline} from '@dcloudio/uni-app'
 	
 //获取图片API
 const bannerList = ref([])
@@ -82,7 +83,8 @@ getBanner();
 const randomList = ref([])
 const getRandom = async()=>{
 	let res = await apiGetRandom()
-	randomList.value = res.data;
+	randomList.value = res.data.data;
+	console.log(randomList.value)
 }
 getRandom();
 
@@ -98,17 +100,37 @@ getNotice();
 const classifyList = ref([])
 const getClassify = async()=>{
 	let res = await apiGetClassify()
-	console.log(res)
 	classifyList.value = res.data.data;
 }
 getClassify();
 
-const goPrev = () => {
-	uni.navigateTo({
-		url:"/pages/prev/prev"
-	})
-}
+const goPrev = (id) => {
+	//storage在预览页面缓存
+	uni.setStorageSync("storageClassList",randomList.value)
 	
+	uni.navigateTo({
+		url:"/pages/prev/prev?id="+ id
+	})
+
+}
+
+//分享页面
+onShareAppMessage((e)=>{
+	console.log(e)
+	return {
+		title:'wallpaper',
+		path:'/pages/index/index'
+	}
+})
+
+//分享朋友圈
+
+onShareTimeline(()=>{
+	return {
+		title:'wallpaper',
+		imageUrl:'/static/image/schoolgirl.png'
+	}
+})
 	
 </script>
 

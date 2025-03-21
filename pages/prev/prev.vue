@@ -26,7 +26,7 @@
 				<uni-icons type="star" size="30"></uni-icons>
 				<view class='text'>{{curInfo.score}}分</view>
 			</view>
-			<view class="box">
+			<view class="box" @click="clickDownload">
 				<uni-icons type="download" size="30"></uni-icons>
 				<view class='text'>下载</view>
 			</view>
@@ -71,6 +71,7 @@
 					<view class="copyRight">
 						本图片来源于网络，非商业使用。本图片来源于网络，非商业使用。本图片来源于网络，非商业使用。本图片来源于网络，非商业使用。本图片来源于网络，非商业使用。本图片来源于网络，非商业使用。本图片来源于网络，非商业使用。本图片来源于网络，非商业使用。本图片来源于网络，非商业使用。
 					</view>
+					<view class="safe-area-inset-bottom"></view>
 				</view>
 			</scroll-view>
 		</view>
@@ -101,7 +102,8 @@
 <script setup>
 import {ref} from "vue"
 import {getStatusBarHeight} from "@/utils/system.js"
-import {onLoad} from "@dcloudio/uni-app"
+import {onLoad,onShareAppMessage,onShareTimeline} from "@dcloudio/uni-app"
+import {apiGetScore} from "@/api/apis.js"
 
 // 点击隐藏遮罩层
 const maskState = ref(true);
@@ -129,17 +131,43 @@ const clickScore = () => {
 //关闭评分弹窗
 const closeRote = () => {
 	scorePopup.value.close();
+	userScore.value = 0
 }
 
 const userScore = ref(0)
 // 给出评分
-const giveScore = () => {
-	console.log(userScore.value)
+const giveScore = async () => {
+	let {classid,_id:wallId} = curInfo.value
+	
+	let res = await apiGetScore({
+		classid,
+		wallId,
+		userScore:userScore.value
+	})
+	
+	
+	
+	if(res.errCode === 0){
+		uni.showToast({
+			title:"评分成功",
+			icon:'none'
+		})
+		closeRote()
+	}
+	
+	
 }
 
 //返回上一页
 const goBack = () => {
-	uni.navigateBack()
+	uni.navigateBack({
+		success:()=>{},
+		fail:(err)=>{
+			uni.reLaunch({
+				url:"/pages/index/index"
+			})
+		}
+	})
 }
 
 // 获取缓存
@@ -198,6 +226,49 @@ const readImgs = ref([])
 //获取当前预览图像的具体信息
 const curInfo = ref(null)
 
+// 点击下载
+const clickDownload = ()=>{
+	// #ifdef H5
+	uni.showModal({
+		content:"请长按保存",
+		showCancel:false
+	})
+	// #endif
+	
+	// #ifndef H5
+	uni.getImageInfo({
+			src:curInfo.value.picurl,
+			success:res=>{
+				uni.saveImageToPhotosAlbum({
+					filePath:res.path,
+					success:result=>{
+						console.log(result)
+					}
+				})
+			}
+		})
+	// #endif
+}
+
+//分享页面
+onShareAppMessage((e)=>{
+	console.log(e)
+	return {
+		title:"wallpaper",
+		path:'/pages/prev/prev?id='+curId.value
+	}
+})
+
+//分享朋友圈
+
+onShareTimeline(()=>{
+	return {
+		title:"wallpaper",
+		
+		query:"id="+curId.value
+	}
+})
+	
 
 
 </script>
@@ -231,9 +302,13 @@ const curInfo = ref(null)
 			left:30rpx;
 			top:0;
 			margin-left: 0;
-			border:1rpx solid rgba(255,255,255,.3                                    );
+			border:1rpx solid rgba(255,255,255,.3);
 			border-radius: 100rpx;
 			backdrop-filter: blur(10rpx);
+			/* 新增样式：Flex 布局实现居中 */
+			display: flex;
+			align-items: center; /* 垂直居中 */
+			justify-content: center; /* 水平居中 */
 		}
 		.count{
 			top:10vh;

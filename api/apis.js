@@ -34,3 +34,17 @@ export function apiGetClassList(data={}){
 		data
 	})
 }
+
+export function apiGetScore(data={}){
+	return request({
+		url:"/score.php",
+		data
+	})
+}
+
+export function apiGetUser(data={}){
+	return request({
+		url:"/user.php",
+		data
+	})
+}

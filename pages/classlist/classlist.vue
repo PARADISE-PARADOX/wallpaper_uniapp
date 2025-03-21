@@ -19,7 +19,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { apiGetClassList } from '@/api/apis.js';
-import { onLoad,onReachBottom } from "@dcloudio/uni-app"
+import { onLoad,onReachBottom,onShareAppMessage,onShareTimeline,onUnload } from "@dcloudio/uni-app"
+import { goIndex } from '@/utils/common.js';
 
 const classList = ref([])
 const noData = ref(false)
@@ -27,13 +28,15 @@ const queryParams = {
 	pageNum:1, //当前请求的是第几页的数据
 	pageSize:12 //每页返回的数据条数
 }
-
+let pageName;
 
 onLoad((e)=>{
 	let {id=null,name=null} = e
 	console.log(id,name);
+	if(!id) goIndex()
 	queryParams.classid=name;
-	
+	queryParams.id=id;
+	pageName = name
 	//修改分类的导航栏
 	uni.setNavigationBarTitle({
 		title:name
@@ -89,6 +92,31 @@ const skeleton = ref([
   },
   
 ]);
+
+
+//分享页面
+onShareAppMessage((e)=>{
+	console.log(e)
+	return {
+		title:"wallpaper"+pageName,
+		path:'/pages/classlist/classlist?id='+queryParams.id +'&name=' + queryParams.classid
+	}
+})
+
+//分享朋友圈
+
+onShareTimeline(()=>{
+	return {
+		title:"wallpaper"+pageName,
+		
+		query:"id="+queryParams.id +"&name=" + queryParams.classid,
+	}
+})
+	
+//清除缓存
+onUnload(()=>{
+	uni.removeStorageSync("storageClassList")
+})
 
 </script>
 

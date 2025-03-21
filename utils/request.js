@@ -1,4 +1,4 @@
-const BASE_URL = "http://127.0.0.1:1555/api"
+const BASE_URL = "https://127.0.0.1:1555/api"
 
 export function request(config={}){
 	let {url,data,header} = config

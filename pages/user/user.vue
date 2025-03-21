@@ -1,11 +1,12 @@
 <template>
   <view class="userLayout pageBg">
-	  <view class="userInfo">
+	  <view :style="{height:getNavBarHeight()+'px'}"></view>
+	  <view class="userInfo" v-if="userInfo">
 		  	<view class='avatar'>
 				<image src="/static/logo.png" mode="aspectFill"></image>
 			</view>
-			<view class="ip">100.100.100.100</view>
-			<view class="address">来自于：西安</view>
+			<view class="ip">{{userInfo.IP}}</view>
+			<view class="address">来自于：{{userInfo.address.city || userInfo.address.province || userInfo.address.country}}</view>
 
 	  </view>
 		<view class="section">
@@ -15,18 +16,18 @@
 						<uni-icons type="download-filled" size="20"></uni-icons>
 						<view class="text1"> 我的下载 </view>
 					</view>
-					<view class="right">
-						<view class="text2"> 33 </view>
+					<view class="right" v-if="userInfo">
+						<view class="text2"> {{userInfo.downloadSize}} </view>
 						<uni-icons type="right" size="20" ></uni-icons>
 					</view>
 				</view>
 				<view class="row" @click="showList">
 					<view class="left">
 						<uni-icons type="star-filled" size="20" ></uni-icons>
-						<view class="text1"> 我的收藏 </view>
+						<view class="text1"> 我的评分 </view>
 					</view>
-					<view class="right">
-						<view class="text2"> 33 </view>
+					<view class="right" v-if="userInfo">
+						<view class="text2"> {{userInfo.scoreSize}} </view>
 						<uni-icons type="right" size="20"></uni-icons>
 					</view>
 				</view>
@@ -85,13 +86,27 @@
 </template>
 
 <script setup>
-	
+import {getNavBarHeight} from '@/utils/system.js'
+import {ref} from "vue"
+import {apiGetUser} from "@/api/apis.js"
+
+const userInfo = ref(null)
+
 const onPhone = ()=>{
 	uni.makePhoneCall({
 		phoneNumber: '114514' 
 	});
 
 }
+
+const getUserInfo = ()=> {
+	apiGetUser().then(res=>{
+		console.log(res.data.data)
+		userInfo.value = res.data.data
+	})
+}
+
+getUserInfo()
 
 const onWechat = ()=>{
 	
